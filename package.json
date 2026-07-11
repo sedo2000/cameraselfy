@@ -1,7 +1,7 @@
 {
-  "name": "camera-telegram-bot",
+  "name": "telegram-bot-dashboard",
   "version": "1.0.0",
-  "description": "إرسال إشعار لتليجرام عند تشغيل الكاميرا",
+  "description": "بوت تليجرام مع لوحة تحكم وأزرار شفافة",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
