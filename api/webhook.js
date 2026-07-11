@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
     if (req.method === 'GET') {
         return res.status(200).json({
             status: '✅ البوت يعمل!',
-            webhook: '/api/webhook',
+            webhook: '/api/webhook.js',
             time: new Date().toISOString()
         });
     }
