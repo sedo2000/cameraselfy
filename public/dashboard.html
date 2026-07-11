@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖥️ لوحة تحكم المطور</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #58a6ff;
+            border-bottom: 2px solid #30363d;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        h1 small {
+            font-size: 14px;
+            color: #8b949e;
+            font-weight: normal;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+        .stat-card .label {
+            color: #8b949e;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .card h2 {
+            color: #58a6ff;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .form-group input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px 14px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+        .form-group input:focus {
+            border-color: #58a6ff;
+            outline: none;
+        }
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #238636;
+            color: white;
+        }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-danger {
+            background: #da3633;
+            color: white;
+        }
+        .btn-danger:hover { background: #f85149; }
+        .btn-warning {
+            background: #9e6a03;
+            color: white;
+        }
+        .btn-warning:hover { background: #bb8009; }
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover { background: #30363d; }
+        
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .button-item {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: border-color 0.2s;
+        }
+        .button-item:hover {
+            border-color: #58a6ff;
+        }
+        .button-icon {
+            font-size: 32px;
+            width: 50px;
+            text-align: center;
+        }
+        .button-info {
+            flex: 1;
+        }
+        .button-info .name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .button-info .url {
+            color: #8b949e;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        .button-info .id {
+            color: #8b949e;
+            font-size: 10px;
+            font-family: monospace;
+        }
+        .button-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .button-actions .btn {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        .toast-success { background: #238636; }
+        .toast-error { background: #da3633; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .empty-state {
+            text-align: center;
+            color: #8b949e;
+            padding: 40px;
+            font-size: 16px;
+        }
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #30363d;
+        }
+        .edit-form.active { display: flex; }
+        .edit-form input {
+            flex: 1;
+            padding: 8px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            🖥️ لوحة تحكم المطور
+            <small>إدارة أزرار البوت</small>
+        </h1>
+
+        <!-- الإحصائيات -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="totalButtons">0</div>
+                <div class="label">📊 إجمالي الأزرار</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="activeButtons">0</div>
+                <div class="label">✅ أزرار نشطة</div>
+            </div>
+        </div>
+
+        <!-- إضافة زر جديد -->
+        <div class="card">
+            <h2>➕ إضافة زر جديد</h2>
+            <div class="form-group">
+                <input type="text" id="btnText" placeholder="📌 اسم الزر (مثال: موقعي)">
+                <input type="text" id="btnUrl" placeholder="🔗 الرابط (مثال: https://example.com)">
+                <input type="text" id="btnIcon" placeholder="🖼️ صورة/إيموجي (مثال: 🌐)" value="🔗">
+                <button class="btn btn-primary" onclick="addButton()">➕ إضافة</button>
+            </div>
+        </div>
+
+        <!-- قائمة الأزرار -->
+        <div class="card">
+            <h2>📋 قائمة الأزرار</h2>
+            <div id="buttonsList">
+                <div class="empty-state">📭 لا توجد أزرار. أضف زراً جديداً!</div>
+            </div>
+        </div>
+
+        <!-- كود المساعدة -->
+        <div class="card" style="background: #0d1117;">
+            <h2>🤖 أوامر البوت للمطور</h2>
+            <div style="font-family: monospace; font-size: 13px; line-height: 1.8; color: #8b949e;">
+                <code>/add|الاسم|الرابط|الصورة</code> - إضافة زر<br>
+                <code>/list</code> - عرض جميع الأزرار<br>
+                <code>/remove ID</code> - حذف زر<br>
+                <code>/edit|ID|الاسم|الرابط|الصورة</code> - تعديل زر<br>
+                <code>/admin</code> - عرض لوحة المساعدة
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEditId = null;
+
+        // ============================================
+        // تحميل الأزرار
+        // ============================================
+        async function loadButtons() {
+            try {
+                const res = await fetch('/api/buttons');
+                const data = await res.json();
+                
+                if (data.success) {
+                    renderButtons(data.buttons);
+                    document.getElementById('totalButtons').textContent = data.buttons.length;
+                    document.getElementById('activeButtons').textContent = data.buttons.length;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في التحميل:', error);
+            }
+        }
+
+        // ============================================
+        // عرض الأزرار
+        // ============================================
+        function renderButtons(buttons) {
+            const container = document.getElementById('buttonsList');
+            
+            if (buttons.length === 0) {
+                container.innerHTML = `<div class="empty-state">📭 لا توجد أزرار. أضف زراً جديداً!</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="buttons-grid">
+                    ${buttons.map(btn => `
+                        <div class="button-item" id="item-${btn.id}">
+                            <div class="button-icon">${btn.icon || '🔗'}</div>
+                            <div class="button-info">
+                                <div class="name">${btn.text}</div>
+                                <div class="url">${btn.url}</div>
+                                <div class="id">🆔 ${btn.id}</div>
+                            </div>
+                            <div class="button-actions">
+                                <button class="btn btn-warning" onclick="startEdit('${btn.id}')">✏️</button>
+                                <button class="btn btn-danger" onclick="deleteButton('${btn.id}')">🗑️</button>
+                            </div>
+                            <div class="edit-form" id="edit-${btn.id}">
+                                <input type="text" id="editText-${btn.id}" value="${btn.text}" placeholder="الاسم">
+                                <input type="text" id="editUrl-${btn.id}" value="${btn.url}" placeholder="الرابط">
+                                <input type="text" id="editIcon-${btn.id}" value="${btn.icon || '🔗'}" placeholder="الصورة">
+                                <button class="btn btn-primary" onclick="saveEdit('${btn.id}')">💾 حفظ</button>
+                                <button class="btn btn-secondary" onclick="cancelEdit('${btn.id}')">❌ إلغاء</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ============================================
+        // إضافة زر
+        // ============================================
+        async function addButton() {
+            const text = document.getElementById('btnText').value.trim();
+            const url = document.getElementById('btnUrl').value.trim();
+            const icon = document.getElementById('btnIcon').value.trim() || '🔗';
+
+            if (!text || !url) {
+                showToast('⚠️ الرجاء إدخال الاسم والرابط', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/buttons/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, url, icon })
+                });
+
+                const data = await res.json();
+                
+                if (data.success) {
+                    showToast('✅ تم إضافة الزر بنجاح!', 'success');
+                    document.getElementById('btnText').value = '';
+                    document.getElementById('btnUrl').value = '';
+                    loadButtons();
+                } else {
+                    showToast('❌ فشل الإضافة: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showToast('❌ خطأ في الاتصال', 'error');
+            }
+        }
+
+        // ============================================
+        // حذف زر
+        // ============================================
+        async function deleteButton(id) {
+            if (!confirm('⚠️ هل أنت متأكد من حذف هذا الزر؟')) return;
+
+            try {
+                const res = await fetch(`/api/buttons/delete/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json();
+                
+                if (data.success) {
+                    showToast('✅ تم حذف الزر بنجاح!', 'success');
+                    loadButtons();
+                } else {
+                    showToast('❌ فشل الحذف: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showToast('❌ خطأ في الاتصال', 'error');
+            }
+        }
+
+        // ============================================
+        // بدء التعديل
+        // ============================================
+        function startEdit(id) {
+            // إخفاء جميع نماذج التعديل
+            document.querySelectorAll('.edit-form').forEach(el => el.classList.remove('active'));
+            
+            // إظهار النموذج المطلوب
+            const form = document.getElementById(`edit-${id}`);
+            if (form) form.classList.add('active');
+            
+            currentEditId = id;
+        }
+
+        // ============================================
+        // حفظ التعديل
+        // ============================================
+        async function saveEdit(id) {
+            const text = document.getElementById(`editText-${id}`).value.trim();
+            const url = document.getElementById(`editUrl-${id}`).value.trim();
+            const icon = document.getElementById(`editIcon-${id}`).value.trim() || '🔗';
+
+            if (!text || !url) {
+                showToast('⚠️ الرجاء إدخال الاسم والرابط', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/buttons/edit/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, url, icon })
+                });
+
+                const data = await res.json();
+                
+                if (data.success) {
+                    showToast('✅ تم تعديل الزر بنجاح!', 'success');
+                    cancelEdit(id);
+                    loadButtons();
+                } else {
+                    showToast('❌ فشل التعديل: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showToast('❌ خطأ في الاتصال', 'error');
+            }
+        }
+
+        // ============================================
+        // إلغاء التعديل
+        // ============================================
+        function cancelEdit(id) {
+            const form = document.getElementById(`edit-${id}`);
+            if (form) form.classList.remove('active');
+            currentEditId = null;
+        }
+
+        // ============================================
+        // Toast notifications
+        // ============================================
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================
+        // تحميل البيانات عند فتح الصفحة
+        // ============================================
+        loadButtons();
+
+        // تحديث تلقائي كل 30 ثانية
+        setInterval(loadButtons, 30000);
+    </script>
+</body>
+</html>
