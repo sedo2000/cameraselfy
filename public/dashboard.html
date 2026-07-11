@@ -3,32 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🖥️ لوحة تحكم المطور</title>
+    <title>🖥️ لوحة تحكم المطور المتكاملة</title>
+    <!-- Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ============================================
+           الأساسيات
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #0d1117;
             color: #c9d1d9;
-            padding: 30px;
+            padding: 20px;
+            min-height: 100vh;
         }
-        .container { max-width: 1100px; margin: 0 auto; }
-        h1 {
-            color: #58a6ff;
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* ============================================
+           رأس الصفحة
+           ============================================ */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
             border-bottom: 2px solid #30363d;
             padding-bottom: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            color: #58a6ff;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            font-size: 24px;
+        }
+        .header h1 small {
+            font-size: 14px;
+            color: #8b949e;
+            font-weight: normal;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
             flex-wrap: wrap;
         }
-        h1 small { font-size: 14px; color: #8b949e; font-weight: normal; }
+
+        /* ============================================
+           التبويبات (Tabs)
+           ============================================ */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+        }
+        .tab-btn {
+            padding: 10px 22px;
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn:hover {
+            background: #161b22;
+            color: #f0f6fc;
+        }
+        .tab-btn.active {
+            background: #1f6feb;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================
+           البطاقات والإحصائيات
+           ============================================ */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .stat-card {
             background: #161b22;
@@ -36,9 +118,27 @@
             border-radius: 10px;
             padding: 20px;
             text-align: center;
+            transition: border-color 0.2s;
         }
-        .stat-card .number { font-size: 28px; font-weight: bold; color: #58a6ff; }
-        .stat-card .label { color: #8b949e; font-size: 12px; margin-top: 5px; }
+        .stat-card:hover {
+            border-color: #58a6ff;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+        .stat-card .label {
+            color: #8b949e;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .stat-card .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
         .card {
             background: #161b22;
             border: 1px solid #30363d;
@@ -46,14 +146,35 @@
             padding: 25px;
             margin-bottom: 25px;
         }
-        .card h2 { color: #58a6ff; font-size: 18px; margin-bottom: 15px; }
+        .card h2 {
+            color: #58a6ff;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h2 .badge {
+            font-size: 12px;
+            background: #238636;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: normal;
+        }
+
+        /* ============================================
+           النماذج
+           ============================================ */
         .form-group {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
             align-items: center;
         }
-        .form-group input {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             flex: 1;
             min-width: 120px;
             padding: 10px 14px;
@@ -62,8 +183,26 @@
             border-radius: 6px;
             color: #c9d1d9;
             font-size: 14px;
+            transition: border-color 0.2s;
         }
-        .form-group input:focus { border-color: #58a6ff; outline: none; }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #58a6ff;
+            outline: none;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .form-group .full-width {
+            flex: 1 1 100%;
+        }
+
+        /* ============================================
+           الأزرار
+           ============================================ */
         .btn {
             padding: 10px 25px;
             border: none;
@@ -72,16 +211,72 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
         }
-        .btn-primary { background: #238636; color: white; }
-        .btn-primary:hover { background: #2ea043; }
-        .btn-danger { background: #da3633; color: white; }
-        .btn-danger:hover { background: #f85149; }
-        .btn-warning { background: #9e6a03; color: white; }
-        .btn-warning:hover { background: #bb8009; }
-        .btn-secondary { background: #21262d; color: #c9d1d9; }
-        .btn-secondary:hover { background: #30363d; }
-        
+        .btn-primary {
+            background: #238636;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+        .btn-danger {
+            background: #da3633;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #f85149;
+        }
+        .btn-warning {
+            background: #9e6a03;
+            color: white;
+        }
+        .btn-warning:hover {
+            background: #bb8009;
+        }
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+        .btn-success {
+            background: #1f883d;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #2ea043;
+        }
+        .btn-purple {
+            background: #7c3aed;
+            color: white;
+        }
+        .btn-purple:hover {
+            background: #8b5cf6;
+        }
+        .btn-pink {
+            background: #db2777;
+            color: white;
+        }
+        .btn-pink:hover {
+            background: #ec4899;
+        }
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ============================================
+           قائمة الأزرار
+           ============================================ */
         .buttons-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -92,35 +287,66 @@
             border: 1px solid #30363d;
             border-radius: 8px;
             padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, transform 0.2s;
         }
-        .button-item:hover { border-color: #58a6ff; }
+        .button-item:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
         .button-top {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-        .button-icon { font-size: 32px; width: 50px; text-align: center; }
-        .button-info { flex: 1; }
-        .button-info .name { font-weight: bold; font-size: 16px; }
-        .button-info .url { color: #8b949e; font-size: 12px; word-break: break-all; }
-        .button-info .id { color: #8b949e; font-size: 10px; font-family: monospace; }
-        .button-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .button-actions .btn { padding: 5px 12px; font-size: 12px; }
+        .button-icon {
+            font-size: 32px;
+            width: 50px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .button-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .button-info .name {
+            font-weight: bold;
+            font-size: 16px;
+            color: #f0f6fc;
+        }
+        .button-info .url {
+            color: #8b949e;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        .button-info .id {
+            color: #8b949e;
+            font-size: 10px;
+            font-family: monospace;
+            background: #161b22;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 3px;
+        }
+        .button-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
         .edit-form {
             display: none;
             flex-wrap: wrap;
             gap: 8px;
-            padding-top: 10px;
+            padding-top: 12px;
+            margin-top: 12px;
             border-top: 1px solid #30363d;
         }
-        .edit-form.active { display: flex; }
+        .edit-form.active {
+            display: flex;
+        }
         .edit-form input {
             flex: 1;
-            min-width: 80px;
+            min-width: 70px;
             padding: 6px 10px;
             background: #0d1117;
             border: 1px solid #30363d;
@@ -128,6 +354,66 @@
             color: #c9d1d9;
             font-size: 12px;
         }
+
+        /* ============================================
+           قائمة المستخدمين
+           ============================================ */
+        .users-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .users-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .users-list::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        .users-list::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 10px;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #21262d;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .user-item:hover {
+            background: #161b22;
+        }
+        .user-item .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-item .user-id {
+            color: #8b949e;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        .user-item .user-name {
+            font-weight: 500;
+        }
+        .user-item .user-status {
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+        .user-status.active {
+            background: #238636;
+            color: white;
+        }
+        .user-status.banned {
+            background: #da3633;
+            color: white;
+        }
+
+        /* ============================================
+           الإشعارات المنبثقة
+           ============================================ */
         .toast {
             position: fixed;
             top: 20px;
@@ -135,77 +421,510 @@
             padding: 15px 25px;
             border-radius: 8px;
             color: white;
-            font-weight: bold;
+            font-weight: 600;
             z-index: 1000;
             animation: slideIn 0.3s ease;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            max-width: 400px;
         }
-        .toast-success { background: #238636; }
-        .toast-error { background: #da3633; }
+        .toast-success {
+            background: #238636;
+        }
+        .toast-error {
+            background: #da3633;
+        }
+        .toast-info {
+            background: #1f6feb;
+        }
         @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
+
+        /* ============================================
+           حالة فارغة
+           ============================================ */
         .empty-state {
             text-align: center;
             color: #8b949e;
-            padding: 40px;
+            padding: 50px 20px;
             font-size: 16px;
         }
-        .commands-help {
+        .empty-state .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        /* ============================================
+           التحميل (Loading)
+           ============================================ */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ============================================
+           استجابة للشاشات
+           ============================================ */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+            .header h1 {
+                font-size: 18px;
+                flex-wrap: wrap;
+            }
+            .tabs {
+                gap: 3px;
+            }
+            .tab-btn {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                min-width: 80px;
+                padding: 8px 10px;
+            }
+            .buttons-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            .header-actions {
+                width: 100%;
+            }
+            .header-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* ============================================
+           شريط التقدم للإعلانات
+           ============================================ */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #30363d;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar .progress-fill {
+            height: 100%;
+            background: #58a6ff;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* ============================================
+           صندوق الأوامر
+           ============================================ */
+        .commands-box {
+            background: #0d1117;
+            padding: 15px 20px;
+            border-radius: 8px;
             font-family: monospace;
             font-size: 13px;
             line-height: 2;
             color: #8b949e;
-            background: #0d1117;
-            padding: 15px;
-            border-radius: 8px;
+            border: 1px solid #30363d;
+        }
+        .commands-box code {
+            color: #f0f6fc;
+            background: #161b22;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .commands-box .cmd-highlight {
+            color: #ffd700;
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>
-            🖥️ لوحة تحكم المطور
-            <small>إدارة أزرار البوت</small>
-        </h1>
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="number" id="totalButtons">0</div>
-                <div class="label">📊 إجمالي الأزرار</div>
+        <!-- ==========================================
+        رأس الصفحة
+        ========================================== -->
+        <div class="header">
+            <h1>
+                🖥️ لوحة تحكم المطور
+                <small>إدارة البوت المتكاملة</small>
+            </h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="refreshAll()">
+                    <i class="fas fa-sync-alt"></i> تحديث الكل
+                </button>
+                <button class="btn btn-secondary" onclick="window.open('/', '_blank')">
+                    <i class="fas fa-external-link-alt"></i> الموقع
+                </button>
             </div>
         </div>
 
-        <div class="card">
-            <h2>➕ إضافة زر جديد</h2>
-            <div class="form-group">
-                <input type="text" id="btnText" placeholder="📌 اسم الزر">
-                <input type="text" id="btnUrl" placeholder="🔗 الرابط">
-                <input type="text" id="btnIcon" placeholder="🖼️ إيموجي" value="🔗">
-                <button class="btn btn-primary" onclick="addButton()">➕ إضافة</button>
+        <!-- ==========================================
+        التبويبات
+        ========================================== -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                <i class="fas fa-chart-pie"></i> لوحة المعلومات
+            </button>
+            <button class="tab-btn" data-tab="buttons" onclick="switchTab('buttons')">
+                <i class="fas fa-th-large"></i> إدارة الأزرار
+            </button>
+            <button class="tab-btn" data-tab="broadcast" onclick="switchTab('broadcast')">
+                <i class="fas fa-bullhorn"></i> إعلانات وبث
+            </button>
+            <button class="tab-btn" data-tab="users" onclick="switchTab('users')">
+                <i class="fas fa-users"></i> المستخدمين
+            </button>
+            <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">
+                <i class="fas fa-cog"></i> الإعدادات
+            </button>
+        </div>
+
+        <!-- ==========================================
+        التبويب 1: لوحة المعلومات
+        ========================================== -->
+        <div class="tab-content active" id="tab-dashboard">
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="icon">👤</span>
+                    <div class="number" id="statUsers">0</div>
+                    <div class="label">إجمالي المستخدمين</div>
+                </div>
+                <div class="stat-card">
+                    <span class="icon">📊</span>
+                    <div class="number" id="statButtons">0</div>
+                    <div class="label">الأزرار النشطة</div>
+                </div>
+                <div class="stat-card">
+                    <span class="icon">📨</span>
+                    <div class="number" id="statMessages">0</div>
+                    <div class="label">رسائل اليوم</div>
+                </div>
+                <div class="stat-card">
+                    <span class="icon">🟢</span>
+                    <div class="number" id="statStatus">✅</div>
+                    <div class="label">حالة البوت</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📈 نشاط البوت</h2>
+                <div id="activityLog" style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 13px; color: #8b949e; background: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid #30363d;">
+                    <div style="color: #58a6ff;">⏳ جاري تحميل النشاط...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🤖 أوامر البوت السريعة</h2>
+                <div class="commands-box">
+                    <code>/start</code> - بدء البوت<br>
+                    <code>/admin</code> - عرض لوحة المساعدة<br>
+                    <code>/add|الاسم|الرابط|الصورة</code> - إضافة زر<br>
+                    <code>/list</code> - عرض جميع الأزرار<br>
+                    <code>/remove ID</code> - حذف زر<br>
+                    <code>/edit|ID|الاسم|الرابط|الصورة</code> - تعديل زر<br>
+                    <code>/broadcast|الرسالة</code> - إرسال إعلان للجميع<br>
+                    <code>/pin|الرسالة</code> - تثبيت رسالة للجميع<br>
+                    <code>/stats</code> - إحصائيات البوت<br>
+                    <code>/dashboard</code> - رابط لوحة التحكم
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <h2>📋 قائمة الأزرار</h2>
-            <div id="buttonsList">
-                <div class="empty-state">📭 لا توجد أزرار</div>
+        <!-- ==========================================
+        التبويب 2: إدارة الأزرار
+        ========================================== -->
+        <div class="tab-content" id="tab-buttons">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="number" id="totalButtons">0</div>
+                    <div class="label">📊 إجمالي الأزرار</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="activeButtons">0</div>
+                    <div class="label">✅ أزرار نشطة</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>➕ إضافة زر جديد</h2>
+                <div class="form-group">
+                    <input type="text" id="btnText" placeholder="📌 اسم الزر (مثال: موقعي)">
+                    <input type="text" id="btnUrl" placeholder="🔗 الرابط (مثال: https://example.com)">
+                    <input type="text" id="btnIcon" placeholder="🖼️ إيموجي (مثال: 🌐)" value="🔗">
+                    <button class="btn btn-primary" onclick="addButton()"><i class="fas fa-plus"></i> إضافة</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📋 قائمة الأزرار <span class="badge" id="buttonCountBadge">0</span></h2>
+                <div id="buttonsList">
+                    <div class="empty-state">
+                        <span class="icon">📭</span>
+                        لا توجد أزرار حالياً.<br>
+                        أضف زراً جديداً باستخدام النموذج أعلاه.
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <h2>🤖 أوامر البوت للمطور</h2>
-            <div class="commands-help">
-                <code>/add|الاسم|الرابط|الصورة</code> - إضافة زر<br>
-                <code>/list</code> - عرض جميع الأزرار<br>
-                <code>/remove ID</code> - حذف زر<br>
-                <code>/edit|ID|الاسم|الرابط|الصورة</code> - تعديل زر<br>
-                <code>/admin</code> - عرض المساعدة
+        <!-- ==========================================
+        التبويب 3: إعلانات وبث
+        ========================================== -->
+        <div class="tab-content" id="tab-broadcast">
+            <div class="card">
+                <h2>📢 إرسال إعلان للجميع</h2>
+                <div class="form-group">
+                    <textarea id="broadcastMessage" placeholder="اكتب رسالة الإعلان هنا...&#10;يمكنك استخدام Markdown للتنظيم"></textarea>
+                    <div class="form-group" style="width: 100%;">
+                        <select id="broadcastType" style="flex: 1; min-width: 120px; padding: 10px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-size: 14px;">
+                            <option value="text">📝 رسالة نصية</option>
+                            <option value="photo">🖼️ صورة + نص</option>
+                            <option value="video">🎬 فيديو + نص</option>
+                        </select>
+                        <input type="text" id="broadcastMedia" placeholder="🔗 رابط الصورة أو الفيديو (اختياري)" style="flex: 2; min-width: 150px; padding: 10px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-size: 14px;">
+                    </div>
+                    <div style="width: 100%; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-success" onclick="sendBroadcast()" style="flex: 1;">
+                            <i class="fas fa-paper-plane"></i> إرسال للجميع
+                        </button>
+                        <button class="btn btn-warning" onclick="sendBroadcastPin()" style="flex: 1;">
+                            <i class="fas fa-thumbtack"></i> إرسال + تثبيت
+                        </button>
+                    </div>
+                </div>
+                <div id="broadcastProgress" style="display: none; margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #8b949e;">
+                        <span id="broadcastStatus">جاري الإرسال...</span>
+                        <span id="broadcastCount">0 / 0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="broadcastProgressFill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📌 الإعلانات المثبتة</h2>
+                <div id="pinnedMessages">
+                    <div class="empty-state">
+                        <span class="icon">📌</span>
+                        لا توجد إعلانات مثبتة حالياً.
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- ==========================================
+        التبويب 4: المستخدمين
+        ========================================== -->
+        <div class="tab-content" id="tab-users">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="number" id="userCount">0</div>
+                    <div class="label">👤 إجمالي المستخدمين</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="activeUserCount">0</div>
+                    <div class="label">🟢 نشطون</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="bannedUserCount">0</div>
+                    <div class="label">⛔ محظورون</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    👥 قائمة المستخدمين
+                    <span class="badge" id="userListBadge">0</span>
+                </h2>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <input type="text" id="userSearch" placeholder="🔍 ابحث عن مستخدم بالمعرف أو الاسم..." onkeyup="searchUsers()" style="flex: 1;">
+                    <button class="btn btn-secondary" onclick="loadUsers()"><i class="fas fa-sync-alt"></i> تحديث</button>
+                </div>
+                <div class="users-list" id="usersList">
+                    <div class="empty-state">
+                        <span class="icon">👤</span>
+                        جاري تحميل المستخدمين...
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📨 إرسال رسالة لمستخدم</h2>
+                <div class="form-group">
+                    <input type="text" id="userMessageId" placeholder="🆔 معرف المستخدم (مثال: 123456789)" style="flex: 1;">
+                    <textarea id="userMessageText" placeholder="📝 نص الرسالة..." style="flex: 2; min-width: 150px; min-height: 60px;"></textarea>
+                    <button class="btn btn-primary" onclick="sendToUser()"><i class="fas fa-paper-plane"></i> إرسال</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+        التبويب 5: الإعدادات
+        ========================================== -->
+        <div class="tab-content" id="tab-settings">
+            <div class="card">
+                <h2>⚙️ إعدادات البوت</h2>
+                <div class="form-group">
+                    <label style="flex: 1; min-width: 150px; color: #8b949e;">🔑 توكن البوت:</label>
+                    <input type="password" id="botToken" placeholder="أدخل توكن البوت..." style="flex: 2; min-width: 200px;" readonly>
+                    <button class="btn btn-secondary btn-sm" onclick="toggleTokenVisibility()"><i class="fas fa-eye"></i></button>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    <label style="flex: 1; min-width: 150px; color: #8b949e;">🆔 معرف المطور:</label>
+                    <input type="text" id="devChatId" placeholder="أدخل معرف المطور..." style="flex: 2; min-width: 200px;" readonly>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    <label style="flex: 1; min-width: 150px; color: #8b949e;">🌐 رابط Webhook:</label>
+                    <input type="text" id="webhookUrl" placeholder="رابط Webhook..." style="flex: 2; min-width: 200px;" readonly>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🔄 إجراءات سريعة</h2>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-danger" onclick="resetWebhook()">
+                        <i class="fas fa-redo"></i> إعادة تعيين Webhook
+                    </button>
+                    <button class="btn btn-warning" onclick="clearAllData()">
+                        <i class="fas fa-trash"></i> مسح جميع الأزرار
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportData()">
+                        <i class="fas fa-download"></i> تصدير البيانات
+                    </button>
+                    <button class="btn btn-secondary" onclick="importData()">
+                        <i class="fas fa-upload"></i> استيراد البيانات
+                    </button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event)">
+            </div>
+
+            <div class="card">
+                <h2>📋 معلومات البوت</h2>
+                <div id="botInfo" style="font-family: monospace; font-size: 13px; color: #8b949e; background: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid #30363d; line-height: 1.8;">
+                    ⏳ جاري تحميل المعلومات...
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <!-- ==========================================
+    جافاسكريبت
+    ========================================== -->
     <script>
+        // ============================================
+        // التبويبات
+        // ============================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+
+            // تحميل البيانات عند التبديل
+            if (tabId === 'dashboard') loadDashboard();
+            if (tabId === 'buttons') loadButtons();
+            if (tabId === 'users') loadUsers();
+            if (tabId === 'settings') loadSettings();
+        }
+
+        // ============================================
+        // الإشعارات المنبثقة
+        // ============================================
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ============================================
+        // تحديث الكل
+        // ============================================
+        function refreshAll() {
+            showToast('🔄 جاري تحديث جميع البيانات...', 'info');
+            loadDashboard();
+            loadButtons();
+            loadUsers();
+            loadSettings();
+        }
+
+        // ============================================
+        // لوحة المعلومات (Dashboard)
+        // ============================================
+        async function loadDashboard() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('statUsers').textContent = data.users || 0;
+                    document.getElementById('statButtons').textContent = data.buttons || 0;
+                    document.getElementById('statMessages').textContent = data.messages || 0;
+                    document.getElementById('statStatus').textContent = data.status || '✅';
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الإحصائيات:', error);
+            }
+
+            // تحميل سجل النشاط
+            try {
+                const res = await fetch('/api/activity');
+                const data = await res.json();
+                if (data.success && data.logs) {
+                    const logContainer = document.getElementById('activityLog');
+                    logContainer.innerHTML = data.logs.map(log =>
+                        `<div>${log}</div>`
+                    ).join('') || '<div style="color: #8b949e;">📭 لا يوجد نشاط حتى الآن</div>';
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل النشاط:', error);
+            }
+        }
+
+        // ============================================
+        // إدارة الأزرار
+        // ============================================
         let currentEditId = null;
 
         async function loadButtons() {
@@ -215,16 +934,24 @@
                 if (data.success) {
                     renderButtons(data.buttons);
                     document.getElementById('totalButtons').textContent = data.buttons.length;
+                    document.getElementById('activeButtons').textContent = data.buttons.length;
+                    document.getElementById('buttonCountBadge').textContent = data.buttons.length;
                 }
             } catch (error) {
-                console.error('❌ خطأ في التحميل:', error);
+                console.error('❌ خطأ في تحميل الأزرار:', error);
             }
         }
 
         function renderButtons(buttons) {
             const container = document.getElementById('buttonsList');
-            if (buttons.length === 0) {
-                container.innerHTML = `<div class="empty-state">📭 لا توجد أزرار</div>`;
+            if (!buttons || buttons.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="icon">📭</span>
+                        لا توجد أزرار حالياً.<br>
+                        أضف زراً جديداً باستخدام النموذج أعلاه.
+                    </div>
+                `;
                 return;
             }
 
@@ -236,20 +963,20 @@
                                 <div class="button-icon">${btn.icon || '🔗'}</div>
                                 <div class="button-info">
                                     <div class="name">${btn.text}</div>
-                                    <div class="url">${btn.url}</div>
+                                    <div class="url">🔗 ${btn.url}</div>
                                     <div class="id">🆔 ${btn.id}</div>
                                 </div>
                                 <div class="button-actions">
-                                    <button class="btn btn-warning" onclick="startEdit('${btn.id}')">✏️</button>
-                                    <button class="btn btn-danger" onclick="deleteButton('${btn.id}')">🗑️</button>
+                                    <button class="btn btn-warning btn-sm" onclick="startEdit('${btn.id}')" title="تعديل"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteButton('${btn.id}')" title="حذف"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
                             <div class="edit-form" id="edit-${btn.id}">
                                 <input type="text" id="editText-${btn.id}" value="${btn.text}" placeholder="الاسم">
                                 <input type="text" id="editUrl-${btn.id}" value="${btn.url}" placeholder="الرابط">
                                 <input type="text" id="editIcon-${btn.id}" value="${btn.icon || '🔗'}" placeholder="الصورة">
-                                <button class="btn btn-primary" onclick="saveEdit('${btn.id}')">💾 حفظ</button>
-                                <button class="btn btn-secondary" onclick="cancelEdit('${btn.id}')">❌ إلغاء</button>
+                                <button class="btn btn-success btn-sm" onclick="saveEdit('${btn.id}')"><i class="fas fa-save"></i> حفظ</button>
+                                <button class="btn btn-secondary btn-sm" onclick="cancelEdit('${btn.id}')"><i class="fas fa-times"></i> إلغاء</button>
                             </div>
                         </div>
                     `).join('')}
@@ -275,25 +1002,25 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('✅ تم الإضافة!', 'success');
+                    showToast('✅ تم إضافة الزر بنجاح!', 'success');
                     document.getElementById('btnText').value = '';
                     document.getElementById('btnUrl').value = '';
                     loadButtons();
                 } else {
-                    showToast('❌ فشل الإضافة', 'error');
+                    showToast('❌ فشل الإضافة: ' + (data.error || 'خطأ غير معروف'), 'error');
                 }
             } catch (error) {
-                showToast('❌ خطأ في الاتصال', 'error');
+                showToast('❌ خطأ في الاتصال بالسيرفر', 'error');
             }
         }
 
         async function deleteButton(id) {
-            if (!confirm('⚠️ هل أنت متأكد من الحذف؟')) return;
+            if (!confirm(`⚠️ هل أنت متأكد من حذف هذا الزر؟\n🆔 المعرف: ${id}`)) return;
             try {
                 const res = await fetch(`/api/buttons/delete/${id}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('✅ تم الحذف!', 'success');
+                    showToast('✅ تم حذف الزر بنجاح!', 'success');
                     loadButtons();
                 } else {
                     showToast('❌ فشل الحذف', 'error');
@@ -328,7 +1055,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('✅ تم التعديل!', 'success');
+                    showToast('✅ تم تعديل الزر بنجاح!', 'success');
                     cancelEdit(id);
                     loadButtons();
                 } else {
@@ -345,20 +1072,399 @@
             currentEditId = null;
         }
 
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.3s';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+        // ============================================
+        // الإعلانات والبث
+        // ============================================
+        async function sendBroadcast() {
+            const message = document.getElementById('broadcastMessage').value.trim();
+            const type = document.getElementById('broadcastType').value;
+            const media = document.getElementById('broadcastMedia').value.trim();
+
+            if (!message && !media) {
+                showToast('⚠️ الرجاء إدخال رسالة أو رابط وسائط', 'error');
+                return;
+            }
+
+            if (!confirm(`⚠️ هل أنت متأكد من إرسال إعلان للجميع؟\n📝 الرسالة: ${message.substring(0, 50)}...`)) return;
+
+            const progressDiv = document.getElementById('broadcastProgress');
+            const statusSpan = document.getElementById('broadcastStatus');
+            const countSpan = document.getElementById('broadcastCount');
+            const progressFill = document.getElementById('broadcastProgressFill');
+
+            progressDiv.style.display = 'block';
+            statusSpan.textContent = '⏳ جاري الإرسال...';
+            countSpan.textContent = 'جاري التحميل...';
+
+            try {
+                const res = await fetch('/api/broadcast', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, type, media })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    statusSpan.textContent = '✅ تم الإرسال بنجاح!';
+                    progressFill.style.width = '100%';
+                    showToast(`✅ تم إرسال الإعلان لـ ${data.sent || 0} مستخدم`, 'success');
+                    document.getElementById('broadcastMessage').value = '';
+                    document.getElementById('broadcastMedia').value = '';
+                } else {
+                    statusSpan.textContent = '❌ فشل الإرسال';
+                    showToast('❌ فشل إرسال الإعلان', 'error');
+                }
+            } catch (error) {
+                statusSpan.textContent = '❌ خطأ في الاتصال';
+                showToast('❌ خطأ في الاتصال بالسيرفر', 'error');
+            } finally {
+                setTimeout(() => {
+                    progressDiv.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 3000);
+            }
         }
 
+        async function sendBroadcastPin() {
+            // نفس دالة الإرسال مع التثبيت
+            const message = document.getElementById('broadcastMessage').value.trim();
+
+            if (!message) {
+                showToast('⚠️ الرجاء إدخال رسالة للتثبيت', 'error');
+                return;
+            }
+
+            if (!confirm(`⚠️ هل أنت متأكد من تثبيت هذه الرسالة للجميع؟\n📝 ${message.substring(0, 50)}...`)) return;
+
+            try {
+                const res = await fetch('/api/pin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('📌 تم تثبيت الرسالة للجميع!', 'success');
+                    loadPinnedMessages();
+                } else {
+                    showToast('❌ فشل التثبيت', 'error');
+                }
+            } catch (error) {
+                showToast('❌ خطأ في الاتصال', 'error');
+            }
+        }
+
+        async function loadPinnedMessages() {
+            try {
+                const res = await fetch('/api/pinned');
+                const data = await res.json();
+                const container = document.getElementById('pinnedMessages');
+                if (data.success && data.pins && data.pins.length > 0) {
+                    container.innerHTML = data.pins.map(pin =>
+                        `<div style="background: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div style="flex: 1; color: #f0f6fc;">${pin.message}</div>
+                            <div style="font-size: 12px; color: #8b949e; display: flex; align-items: center; gap: 10px;">
+                                <span>📌 ${new Date(pin.date).toLocaleString()}</span>
+                                <button class="btn btn-danger btn-sm" onclick="unpinMessage('${pin.id}')"><i class="fas fa-unlink"></i></button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <span class="icon">📌</span>
+                            لا توجد إعلانات مثبتة حالياً.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل المثبتات:', error);
+            }
+        }
+
+        async function unpinMessage(id) {
+            if (!confirm('⚠️ هل أنت متأكد من إلغاء تثبيت هذه الرسالة؟')) return;
+            try {
+                const res = await fetch(`/api/pin/delete/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ تم إلغاء التثبيت', 'success');
+                    loadPinnedMessages();
+                }
+            } catch (error) {
+                showToast('❌ فشل إلغاء التثبيت', 'error');
+            }
+        }
+
+        // ============================================
+        // إدارة المستخدمين
+        // ============================================
+        let allUsers = [];
+
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/users');
+                const data = await res.json();
+                if (data.success) {
+                    allUsers = data.users || [];
+                    renderUsers(allUsers);
+                    document.getElementById('userCount').textContent = allUsers.length;
+                    document.getElementById('activeUserCount').textContent = allUsers.filter(u => !u.banned).length;
+                    document.getElementById('bannedUserCount').textContent = allUsers.filter(u => u.banned).length;
+                    document.getElementById('userListBadge').textContent = allUsers.length;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل المستخدمين:', error);
+            }
+        }
+
+        function renderUsers(users) {
+            const container = document.getElementById('usersList');
+            if (!users || users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="icon">👤</span>
+                        لا يوجد مستخدمون حتى الآن.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = users.map(user =>
+                `<div class="user-item" data-id="${user.id}">
+                    <div class="user-info">
+                        <span style="font-size: 24px;">${user.banned ? '⛔' : '👤'}</span>
+                        <div>
+                            <div class="user-name">${user.first_name || 'مستخدم'}</div>
+                            <div class="user-id">🆔 ${user.id}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <span class="user-status ${user.banned ? 'banned' : 'active'}">
+                            ${user.banned ? '⛔ محظور' : '🟢 نشط'}
+                        </span>
+                        <button class="btn btn-secondary btn-sm" onclick="viewUser('${user.id}')">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        <button class="btn ${user.banned ? 'btn-success' : 'btn-warning'} btn-sm" onclick="toggleBan('${user.id}')">
+                            <i class="fas ${user.banned ? 'fa-user-check' : 'fa-user-slash'}"></i>
+                            ${user.banned ? 'إلغاء الحظر' : 'حظر'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchUsers() {
+            const query = document.getElementById('userSearch').value.toLowerCase();
+            if (!query) {
+                renderUsers(allUsers);
+                return;
+            }
+            const filtered = allUsers.filter(u =>
+                u.id.toString().includes(query) ||
+                (u.first_name && u.first_name.toLowerCase().includes(query)) ||
+                (u.username && u.username.toLowerCase().includes(query))
+            );
+            renderUsers(filtered);
+        }
+
+        async function toggleBan(userId) {
+            if (!confirm(`⚠️ هل أنت متأكد من ${allUsers.find(u => u.id == userId)?.banned ? 'إلغاء حظر' : 'حظر'} هذا المستخدم؟`)) return;
+            try {
+                const res = await fetch('/api/users/ban', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, ban: !allUsers.find(u => u.id == userId)?.banned })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ تم تحديث حالة المستخدم', 'success');
+                    loadUsers();
+                }
+            } catch (error) {
+                showToast('❌ فشل تحديث الحالة', 'error');
+            }
+        }
+
+        async function viewUser(userId) {
+            const user = allUsers.find(u => u.id == userId);
+            if (user) {
+                showToast(`
+                    <div style="text-align: right;">
+                        <strong>👤 ${user.first_name || 'مستخدم'}</strong><br>
+                        🆔 ${user.id}<br>
+                        ${user.username ? '@' + user.username : ''}<br>
+                        ${user.banned ? '⛔ محظور' : '🟢 نشط'}<br>
+                        📅 ${new Date(user.joined_date).toLocaleString()}
+                    </div>
+                `, 'info');
+            }
+        }
+
+        async function sendToUser() {
+            const userId = document.getElementById('userMessageId').value.trim();
+            const message = document.getElementById('userMessageText').value.trim();
+
+            if (!userId || !message) {
+                showToast('⚠️ الرجاء إدخال معرف المستخدم والرسالة', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/message/user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, message })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ تم إرسال الرسالة', 'success');
+                    document.getElementById('userMessageText').value = '';
+                } else {
+                    showToast('❌ فشل الإرسال: ' + (data.error || 'خطأ غير معروف'), 'error');
+                }
+            } catch (error) {
+                showToast('❌ خطأ في الاتصال', 'error');
+            }
+        }
+
+        // ============================================
+        // الإعدادات
+        // ============================================
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('botToken').value = data.botToken || 'لم يتم تعيينه';
+                    document.getElementById('devChatId').value = data.devChatId || 'لم يتم تعيينه';
+                    document.getElementById('webhookUrl').value = data.webhookUrl || 'لم يتم تعيينه';
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الإعدادات:', error);
+            }
+
+            // تحميل معلومات البوت
+            try {
+                const res = await fetch('/api/bot/info');
+                const data = await res.json();
+                const container = document.getElementById('botInfo');
+                if (data.success && data.info) {
+                    const info = data.info;
+                    container.innerHTML = `
+                        <div>🤖 الاسم: <span style="color: #f0f6fc;">${info.username || 'غير معروف'}</span></div>
+                        <div>🆔 المعرف: <span style="color: #f0f6fc;">${info.id || 'غير معروف'}</span></div>
+                        <div>👤 الاسم الكامل: <span style="color: #f0f6fc;">${info.first_name || 'غير معروف'}</span></div>
+                        <div>🔗 رابط البوت: <span style="color: #58a6ff;">${info.username ? 'https://t.me/' + info.username : 'غير معروف'}</span></div>
+                        <div>📅 تاريخ الإنشاء: <span style="color: #f0f6fc;">${info.created_at ? new Date(info.created_at * 1000).toLocaleString() : 'غير معروف'}</span></div>
+                        <div>✅ الحالة: <span style="color: #4caf50;">يعمل</span></div>
+                    `;
+                } else {
+                    container.innerHTML = '❌ فشل تحميل معلومات البوت';
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل معلومات البوت:', error);
+            }
+        }
+
+        function toggleTokenVisibility() {
+            const input = document.getElementById('botToken');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        async function resetWebhook() {
+            if (!confirm('⚠️ هل أنت متأكد من إعادة تعيين Webhook؟')) return;
+            try {
+                const res = await fetch('/api/webhook/reset', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ تم إعادة تعيين Webhook', 'success');
+                    loadSettings();
+                }
+            } catch (error) {
+                showToast('❌ فشل إعادة التعيين', 'error');
+            }
+        }
+
+        async function clearAllData() {
+            if (!confirm('⚠️ هل أنت متأكد من مسح جميع الأزرار؟ هذا الإجراء لا يمكن التراجع عنه!')) return;
+            try {
+                const res = await fetch('/api/buttons/clear', { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ تم مسح جميع الأزرار', 'success');
+                    loadButtons();
+                }
+            } catch (error) {
+                showToast('❌ فشل المسح', 'error');
+            }
+        }
+
+        function exportData() {
+            fetch('/api/export')
+                .then(res => res.json())
+                .then(data => {
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `bot_data_${new Date().toISOString().slice(0,10)}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showToast('✅ تم تصدير البيانات', 'success');
+                })
+                .catch(() => showToast('❌ فشل تصدير البيانات', 'error'));
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const res = await fetch('/api/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        showToast('✅ تم استيراد البيانات بنجاح', 'success');
+                        refreshAll();
+                    } else {
+                        showToast('❌ فشل الاستيراد', 'error');
+                    }
+                } catch (error) {
+                    showToast('❌ ملف غير صالح', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ============================================
+        // تحميل أولي
+        // ============================================
+        loadDashboard();
         loadButtons();
-        setInterval(loadButtons, 30000);
+        loadUsers();
+        loadSettings();
+        loadPinnedMessages();
+
+        // تحديث تلقائي كل دقيقة
+        setInterval(() => {
+            if (document.getElementById('tab-dashboard').classList.contains('active')) loadDashboard();
+            if (document.getElementById('tab-buttons').classList.contains('active')) loadButtons();
+            if (document.getElementById('tab-users').classList.contains('active')) loadUsers();
+        }, 60000);
     </script>
+
 </body>
 </html>
