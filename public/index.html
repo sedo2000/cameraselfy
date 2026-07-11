@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب الكاميرا</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        video {
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            background: #000;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            margin: 20px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+        }
+        button:hover { background: #45a049; }
+        #status { margin-top: 20px; color: #333; }
+    </style>
+</head>
+<body>
+    <h1>📷 الوصول إلى الكاميرا</h1>
+    <video id="video" autoplay playsinline></video>
+    <br>
+    <button id="startBtn">📸 سماح - تشغيل الكاميرا</button>
+    <div id="status">⏳ انتظر...</div>
+
+    <script>
+        const video = document.getElementById('video');
+        const status = document.getElementById('status');
+        const startBtn = document.getElementById('startBtn');
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                // 1️⃣ طلب الوصول للكاميرا
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+                video.srcObject = stream;
+                status.innerHTML = '✅ تم تشغيل الكاميرا بنجاح!';
+                status.style.color = 'green';
+
+                // 2️⃣ إرسال إشعار إلى السيرفر (ثم إلى تليجرام)
+                const response = await fetch('http://localhost:3000/notify-telegram', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'المستخدم سمح بالوصول للكاميرا ✅'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    status.innerHTML += '<br>📨 تم إرسال الإشعار إلى تليجرام!';
+                } else {
+                    status.innerHTML += '<br>❌ فشل إرسال الإشعار';
+                }
+
+            } catch (error) {
+                console.error(error);
+                status.innerHTML = '❌ تم رفض الوصول للكاميرا أو حدث خطأ';
+                status.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
