@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,13 +10,9 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #0d1117;
             color: #c9d1d9;
-            min-height: 100vh;
             padding: 30px;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1100px; margin: 0 auto; }
         h1 {
             color: #58a6ff;
             border-bottom: 2px solid #30363d;
@@ -25,12 +21,9 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
-        h1 small {
-            font-size: 14px;
-            color: #8b949e;
-            font-weight: normal;
-        }
+        h1 small { font-size: 14px; color: #8b949e; font-weight: normal; }
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -44,16 +37,8 @@
             padding: 20px;
             text-align: center;
         }
-        .stat-card .number {
-            font-size: 28px;
-            font-weight: bold;
-            color: #58a6ff;
-        }
-        .stat-card .label {
-            color: #8b949e;
-            font-size: 12px;
-            margin-top: 5px;
-        }
+        .stat-card .number { font-size: 28px; font-weight: bold; color: #58a6ff; }
+        .stat-card .label { color: #8b949e; font-size: 12px; margin-top: 5px; }
         .card {
             background: #161b22;
             border: 1px solid #30363d;
@@ -61,11 +46,7 @@
             padding: 25px;
             margin-bottom: 25px;
         }
-        .card h2 {
-            color: #58a6ff;
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
+        .card h2 { color: #58a6ff; font-size: 18px; margin-bottom: 15px; }
         .form-group {
             display: flex;
             gap: 12px;
@@ -74,7 +55,7 @@
         }
         .form-group input {
             flex: 1;
-            min-width: 150px;
+            min-width: 120px;
             padding: 10px 14px;
             background: #0d1117;
             border: 1px solid #30363d;
@@ -82,10 +63,7 @@
             color: #c9d1d9;
             font-size: 14px;
         }
-        .form-group input:focus {
-            border-color: #58a6ff;
-            outline: none;
-        }
+        .form-group input:focus { border-color: #58a6ff; outline: none; }
         .btn {
             padding: 10px 25px;
             border: none;
@@ -95,25 +73,13 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-primary {
-            background: #238636;
-            color: white;
-        }
+        .btn-primary { background: #238636; color: white; }
         .btn-primary:hover { background: #2ea043; }
-        .btn-danger {
-            background: #da3633;
-            color: white;
-        }
+        .btn-danger { background: #da3633; color: white; }
         .btn-danger:hover { background: #f85149; }
-        .btn-warning {
-            background: #9e6a03;
-            color: white;
-        }
+        .btn-warning { background: #9e6a03; color: white; }
         .btn-warning:hover { background: #bb8009; }
-        .btn-secondary {
-            background: #21262d;
-            color: #c9d1d9;
-        }
+        .btn-secondary { background: #21262d; color: #c9d1d9; }
         .btn-secondary:hover { background: #30363d; }
         
         .buttons-grid {
@@ -127,42 +93,39 @@
             border-radius: 8px;
             padding: 15px;
             display: flex;
-            align-items: center;
-            gap: 15px;
+            flex-direction: column;
+            gap: 10px;
             transition: border-color 0.2s;
         }
-        .button-item:hover {
-            border-color: #58a6ff;
-        }
-        .button-icon {
-            font-size: 32px;
-            width: 50px;
-            text-align: center;
-        }
-        .button-info {
-            flex: 1;
-        }
-        .button-info .name {
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .button-info .url {
-            color: #8b949e;
-            font-size: 12px;
-            word-break: break-all;
-        }
-        .button-info .id {
-            color: #8b949e;
-            font-size: 10px;
-            font-family: monospace;
-        }
-        .button-actions {
+        .button-item:hover { border-color: #58a6ff; }
+        .button-top {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
         }
-        .button-actions .btn {
-            padding: 5px 12px;
+        .button-icon { font-size: 32px; width: 50px; text-align: center; }
+        .button-info { flex: 1; }
+        .button-info .name { font-weight: bold; font-size: 16px; }
+        .button-info .url { color: #8b949e; font-size: 12px; word-break: break-all; }
+        .button-info .id { color: #8b949e; font-size: 10px; font-family: monospace; }
+        .button-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .button-actions .btn { padding: 5px 12px; font-size: 12px; }
+        .edit-form {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid #30363d;
+        }
+        .edit-form.active { display: flex; }
+        .edit-form input {
+            flex: 1;
+            min-width: 80px;
+            padding: 6px 10px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
             font-size: 12px;
         }
         .toast {
@@ -188,21 +151,14 @@
             padding: 40px;
             font-size: 16px;
         }
-        .edit-form {
-            display: none;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #30363d;
-        }
-        .edit-form.active { display: flex; }
-        .edit-form input {
-            flex: 1;
-            padding: 8px 12px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #c9d1d9;
+        .commands-help {
+            font-family: monospace;
             font-size: 13px;
+            line-height: 2;
+            color: #8b949e;
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 8px;
         }
     </style>
 </head>
@@ -213,46 +169,38 @@
             <small>إدارة أزرار البوت</small>
         </h1>
 
-        <!-- الإحصائيات -->
         <div class="stats">
             <div class="stat-card">
                 <div class="number" id="totalButtons">0</div>
                 <div class="label">📊 إجمالي الأزرار</div>
             </div>
-            <div class="stat-card">
-                <div class="number" id="activeButtons">0</div>
-                <div class="label">✅ أزرار نشطة</div>
-            </div>
         </div>
 
-        <!-- إضافة زر جديد -->
         <div class="card">
             <h2>➕ إضافة زر جديد</h2>
             <div class="form-group">
-                <input type="text" id="btnText" placeholder="📌 اسم الزر (مثال: موقعي)">
-                <input type="text" id="btnUrl" placeholder="🔗 الرابط (مثال: https://example.com)">
-                <input type="text" id="btnIcon" placeholder="🖼️ صورة/إيموجي (مثال: 🌐)" value="🔗">
+                <input type="text" id="btnText" placeholder="📌 اسم الزر">
+                <input type="text" id="btnUrl" placeholder="🔗 الرابط">
+                <input type="text" id="btnIcon" placeholder="🖼️ إيموجي" value="🔗">
                 <button class="btn btn-primary" onclick="addButton()">➕ إضافة</button>
             </div>
         </div>
 
-        <!-- قائمة الأزرار -->
         <div class="card">
             <h2>📋 قائمة الأزرار</h2>
             <div id="buttonsList">
-                <div class="empty-state">📭 لا توجد أزرار. أضف زراً جديداً!</div>
+                <div class="empty-state">📭 لا توجد أزرار</div>
             </div>
         </div>
 
-        <!-- كود المساعدة -->
-        <div class="card" style="background: #0d1117;">
+        <div class="card">
             <h2>🤖 أوامر البوت للمطور</h2>
-            <div style="font-family: monospace; font-size: 13px; line-height: 1.8; color: #8b949e;">
+            <div class="commands-help">
                 <code>/add|الاسم|الرابط|الصورة</code> - إضافة زر<br>
                 <code>/list</code> - عرض جميع الأزرار<br>
                 <code>/remove ID</code> - حذف زر<br>
                 <code>/edit|ID|الاسم|الرابط|الصورة</code> - تعديل زر<br>
-                <code>/admin</code> - عرض لوحة المساعدة
+                <code>/admin</code> - عرض المساعدة
             </div>
         </div>
     </div>
@@ -260,32 +208,23 @@
     <script>
         let currentEditId = null;
 
-        // ============================================
-        // تحميل الأزرار
-        // ============================================
         async function loadButtons() {
             try {
                 const res = await fetch('/api/buttons');
                 const data = await res.json();
-                
                 if (data.success) {
                     renderButtons(data.buttons);
                     document.getElementById('totalButtons').textContent = data.buttons.length;
-                    document.getElementById('activeButtons').textContent = data.buttons.length;
                 }
             } catch (error) {
                 console.error('❌ خطأ في التحميل:', error);
             }
         }
 
-        // ============================================
-        // عرض الأزرار
-        // ============================================
         function renderButtons(buttons) {
             const container = document.getElementById('buttonsList');
-            
             if (buttons.length === 0) {
-                container.innerHTML = `<div class="empty-state">📭 لا توجد أزرار. أضف زراً جديداً!</div>`;
+                container.innerHTML = `<div class="empty-state">📭 لا توجد أزرار</div>`;
                 return;
             }
 
@@ -293,15 +232,17 @@
                 <div class="buttons-grid">
                     ${buttons.map(btn => `
                         <div class="button-item" id="item-${btn.id}">
-                            <div class="button-icon">${btn.icon || '🔗'}</div>
-                            <div class="button-info">
-                                <div class="name">${btn.text}</div>
-                                <div class="url">${btn.url}</div>
-                                <div class="id">🆔 ${btn.id}</div>
-                            </div>
-                            <div class="button-actions">
-                                <button class="btn btn-warning" onclick="startEdit('${btn.id}')">✏️</button>
-                                <button class="btn btn-danger" onclick="deleteButton('${btn.id}')">🗑️</button>
+                            <div class="button-top">
+                                <div class="button-icon">${btn.icon || '🔗'}</div>
+                                <div class="button-info">
+                                    <div class="name">${btn.text}</div>
+                                    <div class="url">${btn.url}</div>
+                                    <div class="id">🆔 ${btn.id}</div>
+                                </div>
+                                <div class="button-actions">
+                                    <button class="btn btn-warning" onclick="startEdit('${btn.id}')">✏️</button>
+                                    <button class="btn btn-danger" onclick="deleteButton('${btn.id}')">🗑️</button>
+                                </div>
                             </div>
                             <div class="edit-form" id="edit-${btn.id}">
                                 <input type="text" id="editText-${btn.id}" value="${btn.text}" placeholder="الاسم">
@@ -316,9 +257,6 @@
             `;
         }
 
-        // ============================================
-        // إضافة زر
-        // ============================================
         async function addButton() {
             const text = document.getElementById('btnText').value.trim();
             const url = document.getElementById('btnUrl').value.trim();
@@ -335,63 +273,43 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text, url, icon })
                 });
-
                 const data = await res.json();
-                
                 if (data.success) {
-                    showToast('✅ تم إضافة الزر بنجاح!', 'success');
+                    showToast('✅ تم الإضافة!', 'success');
                     document.getElementById('btnText').value = '';
                     document.getElementById('btnUrl').value = '';
                     loadButtons();
                 } else {
-                    showToast('❌ فشل الإضافة: ' + data.error, 'error');
+                    showToast('❌ فشل الإضافة', 'error');
                 }
             } catch (error) {
                 showToast('❌ خطأ في الاتصال', 'error');
             }
         }
 
-        // ============================================
-        // حذف زر
-        // ============================================
         async function deleteButton(id) {
-            if (!confirm('⚠️ هل أنت متأكد من حذف هذا الزر؟')) return;
-
+            if (!confirm('⚠️ هل أنت متأكد من الحذف؟')) return;
             try {
-                const res = await fetch(`/api/buttons/delete/${id}`, {
-                    method: 'DELETE'
-                });
-
+                const res = await fetch(`/api/buttons/delete/${id}`, { method: 'DELETE' });
                 const data = await res.json();
-                
                 if (data.success) {
-                    showToast('✅ تم حذف الزر بنجاح!', 'success');
+                    showToast('✅ تم الحذف!', 'success');
                     loadButtons();
                 } else {
-                    showToast('❌ فشل الحذف: ' + data.error, 'error');
+                    showToast('❌ فشل الحذف', 'error');
                 }
             } catch (error) {
                 showToast('❌ خطأ في الاتصال', 'error');
             }
         }
 
-        // ============================================
-        // بدء التعديل
-        // ============================================
         function startEdit(id) {
-            // إخفاء جميع نماذج التعديل
             document.querySelectorAll('.edit-form').forEach(el => el.classList.remove('active'));
-            
-            // إظهار النموذج المطلوب
             const form = document.getElementById(`edit-${id}`);
             if (form) form.classList.add('active');
-            
             currentEditId = id;
         }
 
-        // ============================================
-        // حفظ التعديل
-        // ============================================
         async function saveEdit(id) {
             const text = document.getElementById(`editText-${id}`).value.trim();
             const url = document.getElementById(`editUrl-${id}`).value.trim();
@@ -408,39 +326,30 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text, url, icon })
                 });
-
                 const data = await res.json();
-                
                 if (data.success) {
-                    showToast('✅ تم تعديل الزر بنجاح!', 'success');
+                    showToast('✅ تم التعديل!', 'success');
                     cancelEdit(id);
                     loadButtons();
                 } else {
-                    showToast('❌ فشل التعديل: ' + data.error, 'error');
+                    showToast('❌ فشل التعديل', 'error');
                 }
             } catch (error) {
                 showToast('❌ خطأ في الاتصال', 'error');
             }
         }
 
-        // ============================================
-        // إلغاء التعديل
-        // ============================================
         function cancelEdit(id) {
             const form = document.getElementById(`edit-${id}`);
             if (form) form.classList.remove('active');
             currentEditId = null;
         }
 
-        // ============================================
-        // Toast notifications
-        // ============================================
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             toast.textContent = message;
             document.body.appendChild(toast);
-            
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transition = 'opacity 0.3s';
@@ -448,12 +357,7 @@
             }, 3000);
         }
 
-        // ============================================
-        // تحميل البيانات عند فتح الصفحة
-        // ============================================
         loadButtons();
-
-        // تحديث تلقائي كل 30 ثانية
         setInterval(loadButtons, 30000);
     </script>
 </body>
