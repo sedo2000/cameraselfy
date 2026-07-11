@@ -1,14 +1,22 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "rewrites": [
+  "functions": {
+    "api/webhook.js": {
+      "maxDuration": 10
+    }
+  },
+  "routes": [
     {
-      "source": "/api/webhook",
-      "destination": "/api/webhook.js"
+      "src": "/api/webhook",
+      "dest": "/api/webhook.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/public/$1"
+      "src": "/dashboard.html",
+      "dest": "/public/dashboard.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/index.html"
     }
   ]
 }
