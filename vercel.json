@@ -2,12 +2,16 @@
   "version": 2,
   "routes": [
     {
-      "src": "/api/webhook",
+      "src": "/api/(.*)",
       "dest": "/api/webhook.js"
     },
     {
+      "src": "/",
+      "dest": "/public/dashboard.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/public/index.html"
+      "dest": "/public/dashboard.html"
     }
   ]
 }
