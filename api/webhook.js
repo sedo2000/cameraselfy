@@ -1,4 +1,12 @@
 // api/webhook.js
+// ============================================
+// 🏠 إعادة توجيه الصفحة الرئيسية إلى dashboard.html
+// ============================================
+if (req.method === 'GET' && req.url === '/') {
+    // إعادة توجيه إلى dashboard.html
+    res.setHeader('Location', '/dashboard.html');
+    return res.status(302).end();
+}
 const axios = require('axios');
 
 // ============================================
