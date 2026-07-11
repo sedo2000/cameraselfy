@@ -1,26 +1,672 @@
-// إرسال إشعار للبوت
-try {
-    const response = await fetch('/api/webhook', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            fromSite: true,  // 👈 مهم: لتمييز الطلب من الموقع
-            userAgent: navigator.userAgent,
-            test: 'تم السماح للكاميرا'
-        })
-    });
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📡 بث مباشر - كاميرا</title>
+    <style>
+        /* ============================================
+           الأساسيات
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    const result = await response.json(); // ✅ الآن سيكون JSON صحيح
-    console.log('✅ تم الإرسال:', result);
-    
-    if (result.success) {
-        status.innerHTML += '<br>📨 ✅ تم إرسال الإشعار للمطور!';
-    } else {
-        status.innerHTML += '<br>⚠️ تم الإرسال لكن لم يتم استلامه';
-    }
-} catch (error) {
-    console.error('❌ فشل الإرسال:', error);
-    status.innerHTML += '<br>❌ فشل إرسال الإشعار';
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ============================================
+           حاوية البث الرئيسية
+           ============================================ */
+        .stream-container {
+            background: #141414;
+            border-radius: 24px;
+            padding: 20px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2a2a2a;
+        }
+
+        /* ============================================
+           شريط البث (أعلى الفيديو)
+           ============================================ */
+        .stream-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #1a1a1a;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 2px solid #e50914;
+        }
+
+        .stream-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .live-badge {
+            background: #e50914;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            animation: pulse 1.5s infinite;
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .stream-title h2 {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .stream-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .viewer-count {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #aaa;
+        }
+
+        .viewer-count span {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ============================================
+           حاوية الفيديو
+           ============================================ */
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+            aspect-ratio: 16 / 9;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #111;
+        }
+
+        /* ============================================
+           تراكبات فوق الفيديو (Overlays)
+           ============================================ */
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        /* اسم المستخدم في الزاوية */
+        .streamer-name {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border-left: 3px solid #e50914;
+            backdrop-filter: blur(4px);
+        }
+
+        .streamer-name span {
+            color: #e50914;
+        }
+
+        /* إشعارات البث */
+        .stream-notification {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            backdrop-filter: blur(6px);
+            border: 1px solid #333;
+            animation: slideInRight 0.5s ease;
+            max-width: 200px;
+            text-align: center;
+            display: none;
+        }
+
+        .stream-notification.show {
+            display: block;
+        }
+
+        .stream-notification .highlight {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* شعار "بث مباشر" في المنتصف */
+        .live-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.05);
+            font-size: 60px;
+            font-weight: 900;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* ============================================
+           الزر
+           ============================================ */
+        .btn-live {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-top: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e50914, #b20710);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-live:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(229, 9, 20, 0.4);
+        }
+
+        .btn-live:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-live .icon {
+            margin-left: 10px;
+        }
+
+        /* ============================================
+           حالة البث
+           ============================================ */
+        #status {
+            margin-top: 16px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: #1a1a1a;
+            color: #ccc;
+            font-size: 14px;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid #2a2a2a;
+            transition: all 0.3s;
+        }
+
+        #status .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #333;
+            border-top-color: #e50914;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-success {
+            border-color: #4caf50 !important;
+            color: #4caf50 !important;
+        }
+
+        .status-error {
+            border-color: #e50914 !important;
+            color: #e50914 !important;
+        }
+
+        .status-info {
+            border-color: #1e88e5 !important;
+            color: #1e88e5 !important;
+        }
+
+        /* ============================================
+           شريط السفلي (معلومات إضافية)
+           ============================================ */
+        .stream-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding: 10px 16px;
+            background: #111;
+            border-radius: 12px;
+            border: 1px solid #222;
+            color: #777;
+            font-size: 12px;
+        }
+
+        .stream-footer .quality {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #aaa;
+        }
+
+        .stream-footer .quality .dot {
+            width: 6px;
+            height: 6px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* ============================================
+           استجابة للشاشات الصغيرة
+           ============================================ */
+        @media (max-width: 600px) {
+            .stream-container {
+                padding: 12px;
+                border-radius: 16px;
+            }
+            .stream-title h2 {
+                font-size: 14px;
+            }
+            .stream-status {
+                font-size: 11px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+            .streamer-name {
+                font-size: 12px;
+                padding: 5px 12px;
+                bottom: 12px;
+                left: 12px;
+            }
+            .live-watermark {
+                font-size: 30px;
+            }
+            .btn-live {
+                font-size: 17px;
+                padding: 14px;
+            }
+            #status {
+                font-size: 13px;
+                padding: 12px;
+                min-height: 45px;
+            }
+            .stream-footer {
+                font-size: 10px;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .stream-notification {
+                font-size: 11px;
+                padding: 6px 12px;
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stream-container">
+
+        <!-- ==========================================
+        شريط البث العلوي
+        ========================================== -->
+        <div class="stream-header">
+            <div class="stream-title">
+                <span class="live-badge">● بث مباشر</span>
+                <h2>📡 البث التجريبي</h2>
+            </div>
+            <div class="stream-status">
+                <span class="viewer-count">
+                    👁️ <span id="viewerCount">0</span>
+                </span>
+                <span class="status-dot"></span>
+                <span style="color: #4caf50;">مباشر</span>
+            </div>
+        </div>
+
+        <!-- ==========================================
+        حاوية الفيديو
+        ========================================== -->
+        <div class="video-wrapper">
+
+            <!-- الفيديو -->
+            <video id="video" autoplay playsinline muted></video>
+
+            <!-- تراكبات -->
+            <div class="video-overlay">
+                <!-- اسم البث -->
+                <div class="streamer-name">
+                    🎙️ <span>البث التجريبي</span> | كاميرا
+                </div>
+
+                <!-- إشعار منبثق -->
+                <div class="stream-notification" id="notification">
+                    🎉 <span class="highlight">مشاهد جديد</span> انضم للبث!
+                </div>
+
+                <!-- علامة مائية -->
+                <div class="live-watermark">● بث مباشر</div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+        زر تشغيل البث
+        ========================================== -->
+        <button class="btn-live" id="startBtn">
+            <span class="icon">📡</span> بدء البث المباشر
+        </button>
+
+        <!-- ==========================================
+        حالة البث
+        ========================================== -->
+        <div id="status">
+            <span class="spinner"></span>
+            جاهز لبدء البث...
+        </div>
+
+        <!-- ==========================================
+        شريط سفلي
+        ========================================== -->
+        <div class="stream-footer">
+            <span>🔒 بث مشفر</span>
+            <span class="quality">
+                <span class="dot"></span>
+                جودة عالية
+            </span>
+            <span id="streamTime">⏱️ 00:00</span>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+    جافاسكريبت
+    ========================================== -->
+    <script>
+        // ============================================
+        // عناصر الصفحة
+        // ============================================
+        const video = document.getElementById('video');
+        const status = document.getElementById('status');
+        const startBtn = document.getElementById('startBtn');
+        const viewerCount = document.getElementById('viewerCount');
+        const streamTime = document.getElementById('streamTime');
+        const notification = document.getElementById('notification');
+
+        let streamActive = false;
+        let viewerInterval = null;
+        let timeInterval = null;
+        let seconds = 0;
+        let viewerCountNum = 0;
+
+        // ============================================
+        // دالة تحديث عدد المشاهدين (وهمي)
+        // ============================================
+        function updateViewers() {
+            // زيادة ونقصان عشوائيين
+            const change = Math.floor(Math.random() * 3) - 1; // -1, 0, أو 1
+            viewerCountNum = Math.max(1, viewerCountNum + change);
+            viewerCount.textContent = viewerCountNum;
+
+            // عرض إشعار عند زيادة المشاهدين
+            if (change === 1 && streamActive) {
+                showNotification('👋 مشاهد جديد انضم للبث!');
+            }
+        }
+
+        // ============================================
+        // دالة عرض الإشعارات
+        // ============================================
+        function showNotification(text) {
+            notification.textContent = text;
+            notification.classList.add('show');
+            clearTimeout(notification._timeout);
+            notification._timeout = setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // ============================================
+        // دالة تحديث وقت البث
+        // ============================================
+        function updateStreamTime() {
+            seconds++;
+            const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const secs = String(seconds % 60).padStart(2, '0');
+            streamTime.textContent = `⏱️ ${mins}:${secs}`;
+        }
+
+        // ============================================
+        // دالة إرسال إشعار للبوت
+        // ============================================
+        async function sendNotificationToBot() {
+            try {
+                const response = await fetch('/api/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fromSite: true,
+                        userAgent: navigator.userAgent,
+                        message: '📡 بدأ البث المباشر!',
+                        viewers: viewerCountNum
+                    })
+                });
+
+                const result = await response.json();
+                console.log('📨 نتيجة الإرسال:', result);
+                return result.success || false;
+            } catch (error) {
+                console.error('❌ خطأ في الإرسال:', error);
+                return false;
+            }
+        }
+
+        // ============================================
+        // زر بدء البث
+        // ============================================
+        startBtn.addEventListener('click', async () => {
+            if (streamActive) {
+                // إيقاف البث
+                stopStream();
+                return;
+            }
+
+            // ==========================================
+            // بدء البث
+            // ==========================================
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span class="icon">⏳</span> جاري الاتصال...';
+            status.innerHTML = '<span class="spinner"></span> جاري طلب الكاميرا...';
+            status.className = 'status-info';
+
+            try {
+                // 1️⃣ طلب الوصول للكاميرا
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' },
+                    audio: false
+                });
+
+                // 2️⃣ عرض الكاميرا
+                video.srcObject = stream;
+                streamActive = true;
+
+                // 3️⃣ تحديث الزر
+                startBtn.innerHTML = '<span class="icon">⏹️</span> إيقاف البث';
+                startBtn.disabled = false;
+                startBtn.style.background = 'linear-gradient(135deg, #333, #222)';
+
+                // 4️⃣ تحديث الحالة
+                status.innerHTML = '📡 <strong>البث مباشر الآن!</strong> 🎥';
+                status.className = 'status-success';
+
+                // 5️⃣ إرسال إشعار للمطور
+                await sendNotificationToBot();
+
+                // 6️⃣ عرض إشعار "بدأ البث"
+                showNotification('📡 بدأ البث المباشر!');
+
+                // 7️⃣ بدء المؤقتات الوهمية
+                // مشاهدين وهميين
+                viewerCountNum = Math.floor(Math.random() * 10) + 5;
+                viewerCount.textContent = viewerCountNum;
+                viewerInterval = setInterval(updateViewers, 5000);
+
+                // وقت البث
+                seconds = 0;
+                timeInterval = setInterval(updateStreamTime, 1000);
+
+                // إشعارات عشوائية (كل 15-30 ثانية)
+                const notifications = [
+                    '🔥 تفاعل كبير على البث!',
+                    '❤️ تلقيت 5 قلوب جديدة!',
+                    '💬 مشاهد جديد يتابعك!',
+                    '⭐ تم مشاركة البث!',
+                    '🎁 هدية من مشاهد!'
+                ];
+
+                let notifInterval = setInterval(() => {
+                    if (streamActive) {
+                        const randomNotif = notifications[Math.floor(Math.random() * notifications.length)];
+                        showNotification(randomNotif);
+                    } else {
+                        clearInterval(notifInterval);
+                    }
+                }, 15000 + Math.random() * 15000);
+
+                // حفظ الـ interval للإيقاف
+                startBtn._notifInterval = notifInterval;
+
+            } catch (error) {
+                console.error('❌ خطأ:', error);
+
+                if (error.name === 'NotAllowedError') {
+                    status.innerHTML = '❌ تم رفض الوصول للكاميرا من قبل المستخدم';
+                } else if (error.name === 'NotFoundError') {
+                    status.innerHTML = '❌ لا توجد كاميرا متصلة بالجهاز';
+                } else {
+                    status.innerHTML = `❌ حدث خطأ: ${error.message}`;
+                }
+                status.className = 'status-error';
+
+                startBtn.innerHTML = '<span class="icon">📡</span> بدء البث المباشر';
+                startBtn.disabled = false;
+                startBtn.style.background = 'linear-gradient(135deg, #e50914, #b20710)';
+            }
+        });
+
+        // ============================================
+        // دالة إيقاف البث
+        // ============================================
+        function stopStream() {
+            streamActive = false;
+
+            // إيقاف تدفق الكاميرا
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+
+            // إيقاف المؤقتات
+            clearInterval(viewerInterval);
+            clearInterval(timeInterval);
+            clearInterval(startBtn._notifInterval);
+
+            // تحديث الزر
+            startBtn.innerHTML = '<span class="icon">📡</span> بدء البث المباشر';
+            startBtn.disabled = false;
+            startBtn.style.background = 'linear-gradient(135deg, #e50914, #b20710)';
+
+            // تحديث الحالة
+            status.innerHTML = '⏹️ تم إيقاف البث';
+            status.className = 'status-info';
+
+            // إخفاء الإشعار
+            notification.classList.remove('show');
+
+            // إعادة ضبط الوقت
+            streamTime.textContent = '⏱️ 00:00';
+        }
+
+        // ============================================
+        // رسالة ترحيب في وحدة التحكم
+        // ============================================
+        console.log('📡 منصة البث المباشر جاهزة!');
+        console.log('🎥 اضغط على "بدء البث المباشر" لتشغيل الكاميرا');
+    </script>
+
+</body>
+</html>
