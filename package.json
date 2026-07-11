@@ -1,12 +1,18 @@
-{
-  "name": "telegram-bot-vercel",
-  "version": "1.0.0",
-  "description": "بوت تليجرام على Vercel",
-  "main": "api/webhook.js",
-  "scripts": {
-    "dev": "vercel dev"
-  },
-  "dependencies": {
-    "axios": "^1.6.2"
+// إذا كنت تستخدم Axios، تأكد من استدعائها في أعلى ملف api/webhook.js:
+// const axios = require('axios'); // لنظام CommonJS
+
+async function sendTelegramMessage(chatId, text, replyMarkup = null) {
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+  
+  const payload = {
+    chat_id: chatId,
+    text: text
+  };
+
+  if (replyMarkup) {
+    payload.reply_markup = { inline_keyboard: replyMarkup };
   }
+
+  // الإرسال باستخدام Axios بدلاً من fetch
+  await axios.post(url, payload);
 }
