@@ -2,15 +2,7 @@
   "version": 2,
   "routes": [
     {
-      "src": "/api/webhook",
-      "dest": "/api/webhook.js"
-    },
-    {
-      "src": "/dashboard.html",
-      "dest": "/public/dashboard.html"
-    },
-    {
-      "src": "/api/buttons",
+      "src": "/api/(.*)",
       "dest": "/api/webhook.js"
     },
     {
