@@ -1,7 +1,7 @@
 {
   "name": "telegram-bot-vercel",
   "version": "1.0.0",
-  "description": "بوت تليجرام على Vercel",
+  "description": "بوت تليجرام على Vercel مع لوحة تحكم",
   "main": "api/webhook.js",
   "scripts": {
     "dev": "vercel dev"
