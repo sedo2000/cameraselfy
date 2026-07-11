@@ -6,10 +6,6 @@
       "dest": "/api/webhook.js"
     },
     {
-      "src": "/",
-      "dest": "/public/dashboard.html"
-    },
-    {
       "src": "/(.*)",
       "dest": "/public/dashboard.html"
     }
